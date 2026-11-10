@@ -47,6 +47,8 @@ class FinanceUseCaseTest {
         assertThrows(ValidationException.class, () -> useCase.addExpense("x", "0"));
         assertThrows(ValidationException.class, () -> useCase.addExpense("x", "abc"));
         assertThrows(ValidationException.class, () -> useCase.addExpense("x", ""));
+        assertThrows(ValidationException.class, () -> useCase.addExpense("x", "1e3"));
+        assertThrows(ValidationException.class, () -> useCase.addExpense("x", "0.001"));
         assertTrue(useCase.getAllTransactions().isEmpty());
     }
 

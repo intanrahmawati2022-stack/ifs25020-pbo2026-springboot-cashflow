@@ -4,6 +4,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
@@ -19,6 +20,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.delcom.ifs25020pbo2026springbootcashflow.adapter.presenter.FinancePresenter;
+import org.delcom.ifs25020pbo2026springbootcashflow.domain.entity.SortOption;
 import org.delcom.ifs25020pbo2026springbootcashflow.domain.entity.Transaction;
 import org.delcom.ifs25020pbo2026springbootcashflow.domain.exception.EntityNotFoundException;
 import org.delcom.ifs25020pbo2026springbootcashflow.domain.exception.ValidationException;
@@ -41,6 +43,8 @@ public class FinanceView extends VerticalLayout {
 
     private final Grid<Transaction> grid = new Grid<>(Transaction.class, false);
     private final TextField searchField = new TextField();
+    private final ComboBox<SortOption> sortBox = new ComboBox<>();
+    private List<Transaction> currentItems = List.of();
     private final Paragraph statusLabel = new Paragraph();
     private final Span emptyState = new Span(EMPTY_ALL);
     private final Span totalCount = new Span("0");
@@ -61,6 +65,12 @@ public class FinanceView extends VerticalLayout {
         searchField.setAriaLabel("Cari keterangan transaksi");
         searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
         searchField.setClearButtonVisible(true);
+        sortBox.setItems(SortOption.values());
+        sortBox.setItemLabelGenerator(SortOption::label);
+        sortBox.setPlaceholder("Urutkan...");
+        sortBox.setAriaLabel("Urutkan transaksi");
+        sortBox.setClearButtonVisible(true);
+        sortBox.addValueChangeListener(e -> applySort());
         grid.getElement().setAttribute("aria-label", "Daftar transaksi keuangan");
         // Landmark utama halaman (aksesibilitas)
         getElement().setAttribute("role", "main");
@@ -162,7 +172,7 @@ public class FinanceView extends VerticalLayout {
                 "#991B1B");
         Button search = plainButton(new Button("Cari", VaadinIcon.SEARCH.create(), e -> search()));
         Button refresh = plainButton(new Button("Muat Ulang", VaadinIcon.REFRESH.create(), e -> refreshAll()));
-        HorizontalLayout bar = new HorizontalLayout(searchField, search, refresh, income, expense);
+        HorizontalLayout bar = new HorizontalLayout(searchField, sortBox, search, refresh, income, expense);
         bar.setWidthFull();
         bar.setFlexGrow(1, searchField);
         return bar;
@@ -249,8 +259,18 @@ public class FinanceView extends VerticalLayout {
         searchField.clear();
     }
 
+    private void applySort() {
+        SortOption option = sortBox.getValue();
+        if (option == null) {
+            return;
+        }
+        grid.setItems(currentItems.stream().sorted(option.comparator()).toList());
+    }
+
     private void refreshGrid(List<Transaction> items, String title) {
-        grid.setItems(items);
+        currentItems = items;
+        SortOption option = sortBox.getValue();
+        grid.setItems(option == null ? items : items.stream().sorted(option.comparator()).toList());
         updateSummary();
         statusLabel.setText(items.isEmpty()
                 ? title + " — " + emptyState.getText().replaceFirst("^- ", "")

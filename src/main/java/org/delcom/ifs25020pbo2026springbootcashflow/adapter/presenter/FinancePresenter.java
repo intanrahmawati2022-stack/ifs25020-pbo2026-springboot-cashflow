@@ -65,14 +65,6 @@ public class FinancePresenter {
         return String.format("[!] Gagal menghapus transaksi dengan ID: %d.", id);
     }
 
-    public String showInvalidId() {
-        return "[!] ID tidak valid!";
-    }
-
-    public String showInvalidChoice() {
-        return "[!] Pilihan tidak dimengerti.";
-    }
-
     public String showValidationError(String message) {
         return "[!] " + message;
     }

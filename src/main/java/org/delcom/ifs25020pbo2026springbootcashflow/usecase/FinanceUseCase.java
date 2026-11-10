@@ -88,14 +88,16 @@ public class FinanceUseCase {
         if (amountText == null || amountText.trim().isEmpty()) {
             throw new ValidationException("Jumlah tidak boleh kosong");
         }
-        BigDecimal amount;
-        try {
-            amount = new BigDecimal(amountText.trim());
-        } catch (NumberFormatException ex) {
+        String text = amountText.trim();
+        if (!text.matches("[+-]?\\d+(\\.\\d+)?")) {
             throw new ValidationException("Jumlah harus berupa angka");
         }
+        BigDecimal amount = new BigDecimal(text);
         if (amount.signum() <= 0) {
             throw new ValidationException("Jumlah harus lebih dari 0");
+        }
+        if (amount.stripTrailingZeros().scale() > 2) {
+            throw new ValidationException("Jumlah maksimal 2 angka di belakang koma");
         }
         return amount;
     }

@@ -8,21 +8,28 @@ import java.util.Comparator;
  */
 public enum SortOption {
     /** Jumlah terkecil lebih dulu. */
-    AMOUNT_ASC(Comparator.comparing(Transaction::getAmount)),
+    AMOUNT_ASC("Jumlah terkecil", Comparator.comparing(Transaction::getAmount)),
 
     /** Jumlah terbesar lebih dulu. */
-    AMOUNT_DESC(Comparator.comparing(Transaction::getAmount).reversed()),
+    AMOUNT_DESC("Jumlah terbesar", Comparator.comparing(Transaction::getAmount).reversed()),
 
     /** Pemasukan ditampilkan lebih dulu. */
-    INCOME_FIRST(Comparator.comparing((Transaction t) -> t.getType() != TransactionType.INCOME)),
+    INCOME_FIRST("Pemasukan dulu", Comparator.comparing((Transaction t) -> t.getType() != TransactionType.INCOME)),
 
     /** Pengeluaran ditampilkan lebih dulu. */
-    EXPENSE_FIRST(Comparator.comparing((Transaction t) -> t.getType() != TransactionType.EXPENSE));
+    EXPENSE_FIRST("Pengeluaran dulu", Comparator.comparing((Transaction t) -> t.getType() != TransactionType.EXPENSE));
 
+    private final String label;
     private final Comparator<Transaction> comparator;
 
-    SortOption(Comparator<Transaction> comparator) {
+    SortOption(String label, Comparator<Transaction> comparator) {
+        this.label = label;
         this.comparator = comparator;
+    }
+
+    /** Nama opsi untuk ditampilkan. */
+    public String label() {
+        return label;
     }
 
     /** Comparator untuk opsi ini. */
